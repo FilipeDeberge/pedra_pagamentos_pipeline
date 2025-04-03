@@ -50,7 +50,7 @@ def ler_parquet_task():
                 if not verificar_lote_processado(blob.name, db_session):
                     print(f"Lendo arquivo {blob.name}...")
                     df = ler_parquet_do_bucket(BUCKET_NAME, blob.name)
-                    dados = df.head(100000).to_dict(orient="records")
+                    dados = df.to_dict(orient="records")
                     print(f"Arquivo {blob.name} lido com sucesso.")
         db_session.close()
     except Exception as e:
@@ -70,7 +70,7 @@ def inserir_dados_task():
                 if not verificar_lote_processado(blob.name, db_session):
                     print(f"Inserindo dados do arquivo {blob.name}...")
                     df = ler_parquet_do_bucket(BUCKET_NAME, blob.name)
-                    dados = df.head(100000).to_dict(orient="records")
+                    dados = df.to_dict(orient="records")
                     inserir_dados(db_session, dados)
                     print(f"Dados do arquivo {blob.name} inseridos com sucesso.")
         db_session.close()
