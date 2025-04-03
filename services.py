@@ -8,7 +8,7 @@ from repositories import (
     associar_imagens_aos_atendimentos
 )
 from export_dw import exportar_para_dw
-# from airflow.exceptions import AirflowException
+from airflow.exceptions import AirflowException
 import logging
 
 logger = logging.getLogger("airflow.task")
@@ -35,7 +35,7 @@ def verificar_lote_task():
         db_session.close()
     except Exception as e:
         logger.error("Erro ao executar a função: %s", str(e), exc_info=True)
-        # raise AirflowException("Falha na execução da tarefa.")
+        raise AirflowException("Falha na execução da tarefa.")
 
 # Função para ler os arquivos Parquet do bucket
 def ler_parquet_task():
@@ -55,7 +55,7 @@ def ler_parquet_task():
         db_session.close()
     except Exception as e:
         logger.error("Erro ao executar a função: %s", str(e), exc_info=True)
-        # raise AirflowException("Falha na execução da tarefa.")
+        raise AirflowException("Falha na execução da tarefa.")
 
 # Função para inserir os dados no banco
 def inserir_dados_task():
@@ -76,7 +76,7 @@ def inserir_dados_task():
         db_session.close()
     except Exception as e:
         logger.error("Erro ao executar a função: %s", str(e), exc_info=True)
-        # raise AirflowException("Falha na execução da tarefa.")
+        raise AirflowException("Falha na execução da tarefa.")
 
 # Função para registrar o lote processado
 def registrar_lote_task():
@@ -95,7 +95,7 @@ def registrar_lote_task():
         db_session.close()
     except Exception as e:
         logger.error("Erro ao executar a função: %s", str(e), exc_info=True)
-        # raise AirflowException("Falha na execução da tarefa.")
+        raise AirflowException("Falha na execução da tarefa.")
 
 # Função para exportar os dados para o Data Warehouse
 def exportar_para_dw_task():
@@ -105,7 +105,7 @@ def exportar_para_dw_task():
         print("Dados exportados para o Data Warehouse com sucesso.")
     except Exception as e:
         logger.error("Erro ao executar a função: %s", str(e), exc_info=True)
-        # raise AirflowException("Falha na execução da tarefa.")
+        raise AirflowException("Falha na execução da tarefa.")
     finally:
         db_session.close()
 
@@ -129,6 +129,6 @@ def processar_e_associar_imagens_task():
 
     except Exception as e:
         logger.error("Erro ao executar a função: %s", str(e), exc_info=True)
-        # raise AirflowException("Falha na execução da tarefa.")
+        raise AirflowException("Falha na execução da tarefa.")
     
 processar_e_associar_imagens_task()
