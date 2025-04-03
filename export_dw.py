@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 import pandas as pd
-from models import Atendimento
+from models.models import Atendimento
 
 def exportar_para_dw(db: Session):
     """Exporta novos registros para o Data Warehouse de forma otimizada."""

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from alembic.config import Config
 from alembic import command
-from models import Atendimento, LoteProcessado
+from models.models import Atendimento, LoteProcessado
 from datetime import datetime
 from typing import List, Dict
 
@@ -60,4 +60,22 @@ def inserir_dados(session: Session, dados: List[Dict]):
     except SQLAlchemyError as e:
         session.rollback()  # Em caso de erro, reverte a transação
         print(f"Erro ao inserir dados: {e}")
+        raise e
+
+def associar_imagens_aos_atendimentos(session: Session, bucket_name: str, imagens: list):
+    """Associa imagens aos atendimentos no banco de dados."""
+    try:
+        for imagem in imagens:
+            order_number = imagem.split("/")[-1].split(".")[0]  # Pega o número da ordem
+            
+            # Verificar se existe um atendimento com esse número
+            atendimento = session.query(Atendimento).filter_by(order_number=order_number).first()
+            if atendimento:
+                atendimento.image_path = f"https://storage.googleapis.com/{bucket_name}/{imagem}"  # URL da imagem
+                session.commit()
+                print("Imagens associadas com sucesso.")
+
+    except Exception as e:
+        session.rollback()
+        print(f"Erro ao associar imagens no banco: {e}")
         raise e

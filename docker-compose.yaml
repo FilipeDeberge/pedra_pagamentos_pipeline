@@ -6,96 +6,49 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
   airflow-webserver:
-    image: apache/airflow:2.5.1
-    container_name: airflow-webserver
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: airflow-webserver
+    container_name: webserver-airflow
+    depends_on:
+      - postgres
+    entrypoint: ["/opt/airflow/entrypoint.sh"]
+    command: ["airflow", "webserver"]
     environment:
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__WEB_SERVER__SECRET_KEY: my_secret_key
-      AIRFLOW__WEBSERVER__RBAC: "True"
-      AIRFLOW__WEBSERVER__USER_PASSWORD: "admin"
-      AIRFLOW__WEBSERVER__USER_USERNAME: "admin"
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW_UID=50000
+      - AIRFLOW_GID=0
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__WEBSERVER__RBAC=True
+      - PYTHONPATH=/opt/airflow
     ports:
       - "8080:8080"
-    depends_on:
-      - postgres
     volumes:
       - .:/opt/airflow
-    entrypoint: >
-      bash -c '
-        until pg_isready -h postgres -p 5432; do
-          echo "Aguardando PostgreSQL..."
-          sleep 2
-        done
 
-        if [ ! -d "migrations" ]; then
-          alembic init migrations
-        fi
-
-        # Garante que o env.py esteja correto
-        cat > migrations/env.py << EOF
-        from alembic import context
-        from sqlalchemy import engine_from_config, pool
-        from logging.config import fileConfig
-        from models import Base  # Caminho correto dos modelos
-
-        config = context.config
-        fileConfig(config.config_file_name)
-        target_metadata = Base.metadata
-
-        def run_migrations_offline():
-            context.configure(url=config.get_main_option("sqlalchemy.url"), target_metadata=target_metadata, literal_binds=True)
-            with context.begin_transaction():
-                context.run_migrations()
-
-        def run_migrations_online():
-            connectable = engine_from_config(config.get_section(config.config_ini_section), prefix="sqlalchemy.", poolclass=pool.NullPool)
-            with connectable.connect() as connection:
-                context.configure(connection=connection, target_metadata=target_metadata)
-                with context.begin_transaction():
-                    context.run_migrations()
-
-        if context.is_offline_mode():
-            run_migrations_offline()
-        else:
-            run_migrations_online()
-        EOF
-
-            alembic revision --autogenerate -m "Atualizando banco de dados"
-            alembic upgrade head
-            airflow db init
-
-            if ! airflow users list | grep -q admin; then
-              airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin
-            fi
-
-            airflow webserver'
-  
   airflow-scheduler:
-    image: apache/airflow:2.5.1
-    container_name: airflow-scheduler
-    environment:
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__WEB_SERVER__SECRET_KEY: my_secret_key
-      PYTHONPATH: /opt/airflow
-      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: airflow-scheduler
+    container_name: scheduler-airflow
     depends_on:
       - postgres
+      - airflow-webserver
+    command: ["airflow", "scheduler"]
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW_UID=50000
+      - AIRFLOW_GID=0
+      - PYTHONPATH=/opt/airflow
     volumes:
       - .:/opt/airflow
-    entrypoint: >
-      bash -c "
-        until pg_isready -h postgres -p 5432; do
-          echo 'Aguardando PostgreSQL...'
-          sleep 2
-        done &&
-        airflow db init &&
-        airflow scheduler"
-
 volumes:
   postgres_data:

@@ -1,24 +1,13 @@
-# Use a imagem oficial do Python como base
-FROM python:3.9-slim
+FROM apache/airflow:2.7.3-python3.10
 
-# Definir variáveis de ambiente para não interagir com o sistema durante a instalação
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Define o diretório de trabalho
+WORKDIR /opt/airflow
 
-# Definir o diretório de trabalho dentro do container
-WORKDIR /app
+# Copia os arquivos do projeto
+COPY . /opt/airflow
 
-# Copiar o arquivo de requisitos para o container
-COPY requirements.txt /app/
-
-# Instalar as dependências
+# Instala dependências
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar o restante do código para o container
-COPY . /app/
-
-# Definir o entrypoint para iniciar o Airflow
-ENTRYPOINT ["airflow"]
-
-# Comando para rodar o Airflow scheduler
-CMD ["scheduler"]
+# Comando padrão (docker-compose sobrescreve isso)
+CMD ["airflow", "version"]

@@ -7,7 +7,9 @@ from services import (
     inserir_dados_task,
     registrar_lote_task,
     exportar_para_dw_task,
+    processar_e_associar_imagens_task
 )
+from dashboard.gerar_graficos import gerar_graficos
 # Definindo a DAG do Airflow
 dag = DAG(
     'processar_atendimentos_dag',
@@ -37,6 +39,12 @@ inserir_dados = PythonOperator(
     dag=dag
 )
 
+associar_imagens = PythonOperator(
+    task_id='associar_imagens',
+    python_callable=processar_e_associar_imagens_task,
+    dag=dag
+)
+
 registrar_lote = PythonOperator(
     task_id='registrar_lote',
     python_callable=registrar_lote_task,
@@ -49,5 +57,11 @@ exportar_dw = PythonOperator(
     dag=dag
 )
 
+gerar_graficos_atendimentos = PythonOperator(
+    task_id="gerar_graficos",
+    python_callable=gerar_graficos,
+    dag=dag
+)
+
 # Definindo a sequência de execução das tarefas
-verificar_lote >> ler_parquet >> inserir_dados >> registrar_lote >> exportar_dw
+verificar_lote >> ler_parquet >> inserir_dados >> associar_imagens >> registrar_lote >> exportar_dw >> gerar_graficos_atendimentos

@@ -1,7 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-
 Base = declarative_base()
 
 class Atendimento(Base):
@@ -27,6 +25,7 @@ class Atendimento(Base):
     street_name = Column(String)
     provider = Column(String)
     country = Column(String)
+    image_path = Column(String)
     exportado_para_dw = Column(Boolean, default=False)
 
 class LoteProcessado(Base):
