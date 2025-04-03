@@ -59,21 +59,8 @@ Se o banco de dados e as tabelas não existirem, eles serão criados automaticam
 
 📜 Estrutura do Projeto
 
-├── dags/                  # DAGs do Airflow
-├── dashboard/             # Dashboards gerados
-│   ├── gerar_graficos.py  # Script para geração dos gráficos baseados nas KPIs
-├── models/                # Modelos SQLAlchemy
-│   ├── models.py          # Definição das tabelas
-│   ├── create_tables.sql  # Script SQL para criação de tabelas
-├── airflow.cfg            # Arquivo de configuração do airflow
-├── alembic.ini            # Arquivo de configuração do alembic utilizado com o SQLAlchemy
-├── config.py              # Configuração do banco de dados
-├── services.py            # Camada de serviços para centralizar as regras de negócio
-├── repositories.py        # Camada de repositórios para centralizar os fluxos no banco de dados
-├── export_dw.py           # Script para exportar dados para DW
-├── docker-compose.yml     # Configuração do Docker
-├── entrypoint.sh          # Script de inicialização
-└── README.md              # Documentação do projeto
+![image](https://github.com/user-attachments/assets/44bcdd21-aaba-4ca5-8c65-af8caabeed2d)
+
 
 ✅ Próximos Passos
 
